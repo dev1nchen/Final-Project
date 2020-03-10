@@ -10,19 +10,19 @@ nbadata <- url %>%
 attach(nbadata)
 
 #The variables names appeared multiple times in the dataset so we must remove them
-nbadata<- nbadata[-c(23, 54, 77, 102, 133, 160, 187, 216, 239, 264, 291, 312,
+nbadata2<- nbadata[-c(23, 54, 77, 102, 133, 160, 187, 216, 239, 264, 291, 312,
                      337, 362, 385, 406, 430, 457, 480, 503, 528, 551, 579, 604, 631), ]
 
 #Convert necessary columns from character to numeric
 cols = c(1,4, 6:30)    
-nbadata[,cols] = apply(nbadata[,cols],2,  function(x) as.numeric(as.character(x)))
+nbadata2[,cols] = apply(nbadata2[,cols],2,  function(x) as.numeric(as.character(x)))
 
 #Replace "NAs" with 0s
-nbadata<- nbadata%>%
+nbadata2<- nbadata2%>%
   mutate_all(~replace(., is.na(.), 0))
 
 #Remove %s from variable names
-nbadata<-nbadata%>%
+nbadata2<-nbadata2%>%
   rename(
     "FGPercentage" = "FG%",
     "3PPercentage" = "3P%",
@@ -62,10 +62,9 @@ nbadata<-nbadata%>%
 #PF -- Personal Fouls Per Game
 #PTS -- Points Per Game
 library(plotly)
-p<-ggplot(data = nbadata, mapping = aes(x = FTPercentage, y = ORB, color=Player))+geom_point()+ theme(legend.position = "none")
-p
-p <- ggplotly(p, hoverinfo=Player)
-p
+#p<-ggplot(data = nbadata, mapping = aes(x = FTPercentage, y = ORB, color=Player))+geom_point()+ theme(legend.position = "none")
+#p <- ggplotly(p, hoverinfo=Player)
+#p
 
 #Shiny App
 library(shiny)
@@ -73,8 +72,8 @@ cols2 = c(4,5 ,6:30)
 ui <- fluidPage(
   headerPanel('NBA Stats'),
   sidebarPanel(
-    selectInput('xcol','X Variable', names(nbadata[cols2])),
-    selectInput('ycol','Y Variable', names(nbadata[cols2])),
+    selectInput('xcol','X Variable', names(nbadata2[cols2])),
+    selectInput('ycol','Y Variable', names(nbadata2[cols2])),
     selected = names(nbadata[cols2])[[2]]),
   mainPanel(
     plotlyOutput('plot')
@@ -84,11 +83,11 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   x <- reactive({
-    nbadata[,input$xcol]
+    nbadata2[,input$xcol]
   })
   
   y <- reactive({
-    nbadata[,input$ycol]
+    nbadata2[,input$ycol]
   })
   
   
@@ -96,15 +95,16 @@ server <- function(input, output) {
     plot1 <- plot_ly(
       x = x(),
       y = y(), 
+      color=nbadata2$Player,
+      showlegend=FALSE,
       type = 'scatter',
       mode = 'markers'
-  )
-  )
+    )%>%layout(xaxis = list(title = input$xcol), yaxis = list(title = input$ycol)))
+  
   
 }
 
 shinyApp(ui,server)
-
 
 
 
