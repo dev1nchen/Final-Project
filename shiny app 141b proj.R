@@ -1,5 +1,6 @@
 library(tidyverse)
 library(rvest)
+library(plotly)
 #Read in url
 url<-("https://www.basketball-reference.com/leagues/NBA_2020_per_game.html")
 nbadata <- url %>% 
